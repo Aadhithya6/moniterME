@@ -14,9 +14,14 @@ import History from '@/pages/History';
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#0B0B0F]">
+      <div className="min-h-screen bg-[#0A0D12] text-[#E6EDF3] selection:bg-[#B4F000] selection:text-black">
+        <div className="performance-glow" />
         <Navbar />
-        <main className="ml-72 p-8">{children}</main>
+        <main className="pl-20 min-h-screen">
+          <div className="p-12 animate-in fade-in duration-1000">
+            {children}
+          </div>
+        </main>
       </div>
     </ProtectedRoute>
   );

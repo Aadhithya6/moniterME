@@ -2,30 +2,33 @@ type Props = {
   value: number;
   max: number;
   label: string;
-  color?: 'emerald' | 'blue' | 'amber';
+  color?: 'accent' | 'blue' | 'warning';
 };
 
-export default function ProgressBar({ value, max, label, color = 'emerald' }: Props) {
+export default function ProgressBar({ value, max, label, color = 'accent' }: Props) {
   const percent = max > 0 ? Math.min(100, (value / max) * 100) : 0;
-  const colorClass =
-    color === 'emerald'
-      ? 'bg-emerald-500'
-      : color === 'blue'
-        ? 'bg-blue-500'
-        : 'bg-amber-500';
+  
+  const colorHex = 
+    color === 'accent' ? 'var(--accent)' : 
+    color === 'blue' ? 'var(--signal-blue)' : 
+    'var(--warning)';
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span className="font-medium text-gray-300">{label}</span>
-        <span className="text-gray-500">
-          {value} / {max}
+    <div className="space-y-1">
+      <div className="flex justify-between items-baseline">
+        <span className="performance-header">{label}</span>
+        <span className="font-mono-numeric text-[0.7rem] text-[#8B949E]">
+          {value.toLocaleString()} / {max.toLocaleString()}
         </span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
+      <div className="h-[3px] w-full bg-[#161B23]">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${colorClass}`}
-          style={{ width: `${percent}%` }}
+          className="h-full transition-all duration-700 ease-out fill-animation"
+          style={{ 
+            width: `${percent}%`,
+            backgroundColor: colorHex,
+            boxShadow: `0 0 10px ${colorHex}40`
+          }}
         />
       </div>
     </div>
