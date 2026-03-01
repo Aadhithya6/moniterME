@@ -2,11 +2,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/add-food', label: 'Add Food' },
-  { href: '/add-workout', label: 'Add Workout' },
-  { href: '/goals', label: 'Goals' },
-  { href: '/history', label: 'History' },
+  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
+  { href: '/add-food', label: 'Add Food', icon: '🍽️' },
+  { href: '/add-workout', label: 'Workout', icon: '💪' },
+  { href: '/goals', label: 'Goals', icon: '🎯' },
+  { href: '/history', label: 'History', icon: '📈' },
 ];
 
 export default function Navbar() {
@@ -20,36 +20,45 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="border-b border-slate-200 bg-white shadow-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link to="/dashboard" className="text-xl font-bold text-emerald-600">
-          HealthyFi
-        </Link>
-        <div className="flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === link.href
-                  ? 'text-emerald-600'
-                  : 'text-slate-600 hover:text-emerald-600'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500">{user?.name}</span>
-            <button
-              onClick={handleLogout}
-              className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200"
-            >
-              Logout
-            </button>
+    <div className="fixed left-0 top-0 h-screen w-64 glass-card m-4 p-6 flex flex-col">
+      <Link to="/dashboard" className="text-2xl font-bold text-emerald-400 mb-12">
+        HealthyFi
+      </Link>
+      
+      <nav className="flex-1 space-y-2">
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            to={link.href}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              location.pathname === link.href
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+            }`}
+          >
+            <span className="text-xl">{link.icon}</span>
+            <span className="font-medium">{link.label}</span>
+          </Link>
+        ))}
+      </nav>
+      
+      <div className="pt-6 border-t border-white/10">
+        <div className="flex items-center gap-3 mb-4 px-4">
+          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-semibold">
+            {user?.name?.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
+            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
           </div>
         </div>
+        <button
+          onClick={handleLogout}
+          className="w-full px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-gray-200 text-sm font-medium transition-all duration-200"
+        >
+          Logout
+        </button>
       </div>
-    </nav>
+    </div>
   );
 }

@@ -69,14 +69,14 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500/20 border-t-emerald-500" />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="rounded-lg bg-red-50 p-4 text-red-600">
+      <div className="glass-card p-4 text-red-400">
         {error || 'No data available'}
       </div>
     );
@@ -91,57 +91,69 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-slate-800">Today&apos;s Overview</h1>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-100">Today's Overview</h1>
+        <p className="text-gray-500 mt-1">{data.date}</p>
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Calories</p>
-          <p className="text-2xl font-bold text-emerald-600">{totals.calories}</p>
+        <div className="glass-card p-6 hover:scale-[1.02] transition-transform duration-200">
+          <p className="text-sm font-medium text-gray-400">Calories</p>
+          <p className="text-3xl font-bold text-emerald-400 mt-2">{totals.calories}</p>
           {goals?.calorieGoal && (
-            <ProgressBar value={totals.calories} max={goals.calorieGoal} label="" color="emerald" />
+            <div className="mt-4">
+              <ProgressBar value={totals.calories} max={goals.calorieGoal} label="" color="emerald" />
+            </div>
           )}
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Protein (g)</p>
-          <p className="text-2xl font-bold text-blue-600">{totals.protein}</p>
+        
+        <div className="glass-card p-6 hover:scale-[1.02] transition-transform duration-200">
+          <p className="text-sm font-medium text-gray-400">Protein (g)</p>
+          <p className="text-3xl font-bold text-blue-400 mt-2">{totals.protein}</p>
           {goals?.proteinGoal && (
-            <ProgressBar value={totals.protein} max={goals.proteinGoal} label="" color="blue" />
+            <div className="mt-4">
+              <ProgressBar value={totals.protein} max={goals.proteinGoal} label="" color="blue" />
+            </div>
           )}
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Water (ml)</p>
-          <p className="text-2xl font-bold text-sky-600">{totals.waterMl}</p>
+        
+        <div className="glass-card p-6 hover:scale-[1.02] transition-transform duration-200">
+          <p className="text-sm font-medium text-gray-400">Water (ml)</p>
+          <p className="text-3xl font-bold text-cyan-400 mt-2">{totals.waterMl}</p>
           {goals?.waterGoal && (
-            <ProgressBar value={totals.waterMl} max={goals.waterGoal} label="" color="blue" />
+            <div className="mt-4">
+              <ProgressBar value={totals.waterMl} max={goals.waterGoal} label="" color="blue" />
+            </div>
           )}
-          <form onSubmit={handleAddWater} className="mt-3 flex gap-2">
+          <form onSubmit={handleAddWater} className="mt-4 flex gap-2">
             <input
               type="number"
               min={1}
               value={waterAmount}
               onChange={(e) => setWaterAmount(e.target.value)}
-              className="w-20 rounded border border-slate-300 px-2 py-1 text-sm"
+              className="glass-input w-20 text-sm"
             />
             <button
               type="submit"
               disabled={waterLoading}
-              className="rounded bg-sky-600 px-3 py-1 text-sm text-white hover:bg-sky-700 disabled:opacity-50"
+              className="glass-button text-sm px-3"
             >
               + Add
             </button>
           </form>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Workouts</p>
-          <p className="text-2xl font-bold text-slate-800">{totals.workoutCount}</p>
+        
+        <div className="glass-card p-6 hover:scale-[1.02] transition-transform duration-200">
+          <p className="text-sm font-medium text-gray-400">Workouts</p>
+          <p className="text-3xl font-bold text-gray-200 mt-2">{totals.workoutCount}</p>
         </div>
       </div>
 
       {goals && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-slate-800">Goal Completion</h2>
-          <div className="space-y-4">
+        <div className="glass-card p-8">
+          <h2 className="text-xl font-semibold text-gray-100 mb-6">Goal Completion</h2>
+          <div className="space-y-6">
             {completion.calories != null && goals.calorieGoal && (
               <ProgressBar
                 value={totals.calories}
@@ -168,21 +180,28 @@ export default function Dashboard() {
             )}
           </div>
           {!goals.calorieGoal && !goals.proteinGoal && !goals.waterGoal && (
-            <p className="text-slate-500">Set your goals to track progress.</p>
+            <p className="text-gray-500">Set your goals to track progress.</p>
           )}
         </div>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Macros Today</h2>
+      <div className="glass-card p-8">
+        <h2 className="text-xl font-semibold text-gray-100 mb-6">Macros Today</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={macroData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" stroke="#64748b" />
-              <YAxis stroke="#64748b" />
-              <Tooltip />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis dataKey="name" stroke="#9CA3AF" />
+              <YAxis stroke="#9CA3AF" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#111217', 
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  color: '#E5E7EB'
+                }} 
+              />
+              <Bar dataKey="value" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -191,19 +210,19 @@ export default function Dashboard() {
       <div className="flex flex-wrap gap-4">
         <Link
           to="/add-food"
-          className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white shadow-md transition hover:bg-emerald-700"
+          className="glass-button-primary"
         >
           Add Food
         </Link>
         <Link
           to="/add-workout"
-          className="rounded-xl border-2 border-emerald-600 px-6 py-3 font-semibold text-emerald-600 transition hover:bg-emerald-50"
+          className="glass-button"
         >
           Add Workout
         </Link>
         <Link
           to="/goals"
-          className="rounded-xl border-2 border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-100"
+          className="glass-button"
         >
           Set Goals
         </Link>

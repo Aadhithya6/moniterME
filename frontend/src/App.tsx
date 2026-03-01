@@ -14,9 +14,9 @@ import History from '@/pages/History';
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#0B0B0F]">
         <Navbar />
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main className="ml-72 p-8">{children}</main>
       </div>
     </ProtectedRoute>
   );

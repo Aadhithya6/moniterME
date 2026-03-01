@@ -68,18 +68,21 @@ export default function AddWorkout() {
   };
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-slate-800">Add Workout</h1>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-100">Add Workout</h1>
+        <p className="text-gray-400 mt-2">Log your training session</p>
+      </div>
 
       {!sessionId ? (
-        <div>
-          <p className="mb-4 text-slate-600">
+        <div className="glass-card p-8 max-w-2xl">
+          <p className="mb-6 text-gray-300">
             Start a new workout session to log your exercises.
           </p>
           <button
             onClick={startSession}
             disabled={loading}
-            className="rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            className="glass-button-primary"
           >
             {loading ? 'Starting...' : 'Start Workout'}
           </button>
@@ -87,48 +90,48 @@ export default function AddWorkout() {
       ) : (
         <div className="space-y-6">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
+            <div className="glass-card p-3 text-sm text-red-400 border-red-500/20">{error}</div>
           )}
 
           <form
             onSubmit={addExerciseToSession}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="glass-card p-8"
           >
-            <h2 className="mb-4 text-lg font-semibold text-slate-800">Add Exercise</h2>
+            <h2 className="text-xl font-semibold text-gray-100 mb-6">Add Exercise</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Exercise</label>
+                <label className="mb-2 block text-sm font-medium text-gray-300">Exercise</label>
                 <input
                   type="text"
                   value={exerciseName}
                   onChange={(e) => setExerciseName(e.target.value)}
                   required
                   placeholder="e.g. Bench Press"
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="glass-input w-full"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Sets</label>
+                <label className="mb-2 block text-sm font-medium text-gray-300">Sets</label>
                 <input
                   type="number"
                   min={1}
                   value={sets}
                   onChange={(e) => setSets(parseInt(e.target.value, 10) || 0)}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="glass-input w-full"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Reps</label>
+                <label className="mb-2 block text-sm font-medium text-gray-300">Reps</label>
                 <input
                   type="number"
                   min={1}
                   value={reps}
                   onChange={(e) => setReps(parseInt(e.target.value, 10) || 0)}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="glass-input w-full"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-2 block text-sm font-medium text-gray-300">
                   Weight (kg)
                 </label>
                 <input
@@ -138,14 +141,14 @@ export default function AddWorkout() {
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
                   placeholder="Optional"
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="glass-input w-full"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-lg bg-emerald-600 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                  className="glass-button w-full"
                 >
                   {loading ? 'Adding...' : 'Add'}
                 </button>
@@ -154,18 +157,18 @@ export default function AddWorkout() {
           </form>
 
           <div>
-            <h2 className="mb-4 text-lg font-semibold text-slate-800">This Session</h2>
+            <h2 className="text-xl font-semibold text-gray-100 mb-4">This Session</h2>
             {exercises.length === 0 ? (
-              <p className="text-slate-500">No exercises added yet.</p>
+              <div className="glass-card p-8 text-center text-gray-500">No exercises added yet.</div>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {exercises.map((ex, i) => (
                   <li
                     key={ex.id || i}
-                    className="flex justify-between rounded-lg border border-slate-200 bg-white px-4 py-3"
+                    className="glass-card p-4 flex justify-between items-center hover:bg-white/10 transition-colors"
                   >
-                    <span className="font-medium">{ex.exerciseName}</span>
-                    <span className="text-slate-600">
+                    <span className="font-medium text-gray-200">{ex.exerciseName}</span>
+                    <span className="text-gray-400">
                       {ex.sets}×{ex.reps}
                       {ex.weight != null && ` @ ${ex.weight}kg`}
                     </span>
@@ -180,7 +183,7 @@ export default function AddWorkout() {
               setSessionId(null);
               setExercises([]);
             }}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-100"
+            className="glass-button"
           >
             Finish Workout
           </button>

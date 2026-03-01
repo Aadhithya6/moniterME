@@ -43,20 +43,22 @@ export default function Goals() {
   };
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-slate-800">Fitness Goals</h1>
-      <p className="text-slate-600">
-        Set your daily targets. The dashboard will show your progress.
-      </p>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-100">Fitness Goals</h1>
+        <p className="text-gray-400 mt-2">
+          Set your daily targets. The dashboard will show your progress.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="max-w-xl space-y-4">
+      <form onSubmit={handleSubmit} className="glass-card p-8 max-w-2xl space-y-6">
         {success && (
-          <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+          <div className="glass-card p-3 text-sm text-emerald-400 border-emerald-500/20">
             Goals saved successfully!
           </div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-gray-300">
             Calorie Goal (kcal/day)
           </label>
           <input
@@ -65,11 +67,11 @@ export default function Goals() {
             value={calorieGoal}
             onChange={(e) => setCalorieGoal(e.target.value)}
             placeholder="e.g. 2000"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input w-full"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-gray-300">
             Protein Goal (g/day)
           </label>
           <input
@@ -78,11 +80,11 @@ export default function Goals() {
             value={proteinGoal}
             onChange={(e) => setProteinGoal(e.target.value)}
             placeholder="e.g. 150"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input w-full"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-gray-300">
             Water Goal (ml/day)
           </label>
           <input
@@ -91,11 +93,11 @@ export default function Goals() {
             value={waterGoal}
             onChange={(e) => setWaterGoal(e.target.value)}
             placeholder="e.g. 2500"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input w-full"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-gray-300">
             Target Weight (kg)
           </label>
           <input
@@ -105,13 +107,13 @@ export default function Goals() {
             value={targetWeight}
             onChange={(e) => setTargetWeight(e.target.value)}
             placeholder="e.g. 70"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input w-full"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-emerald-600 px-6 py-2.5 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          className="glass-button-primary"
         >
           {loading ? 'Saving...' : 'Save Goals'}
         </button>

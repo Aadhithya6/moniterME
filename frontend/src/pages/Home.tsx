@@ -12,32 +12,55 @@ export default function Home() {
 
   if (isLoading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0F]">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500/20 border-t-emerald-500" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-50 px-4">
-      <main className="max-w-lg text-center">
-        <h1 className="mb-2 text-4xl font-bold tracking-tight text-emerald-700">HealthyFi</h1>
-        <p className="mb-8 text-lg text-slate-600">
-          AI-powered fitness tracking. Track food, workouts, water, and goals.
-        </p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B0B0F] px-4">
+      <main className="max-w-2xl text-center animate-in fade-in duration-700">
+        <div className="mb-12">
+          <h1 className="mb-4 text-6xl font-bold tracking-tight text-gray-100">
+            Healthy<span className="text-emerald-400">Fi</span>
+          </h1>
+          <p className="text-xl text-gray-400">
+            AI-powered fitness tracking for the modern athlete
+          </p>
+          <p className="mt-3 text-gray-500">
+            Track food, workouts, water intake, and achieve your goals
+          </p>
+        </div>
+        
         <div className="flex gap-4 justify-center">
           <Link
             to="/login"
-            className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-700"
+            className="glass-button-primary px-8 py-3 text-lg"
           >
             Login
           </Link>
           <Link
             to="/register"
-            className="rounded-xl border-2 border-emerald-600 px-6 py-3 font-semibold text-emerald-600 transition hover:bg-emerald-50"
+            className="glass-button px-8 py-3 text-lg"
           >
             Register
           </Link>
+        </div>
+        
+        <div className="mt-16 grid grid-cols-3 gap-8 text-center">
+          <div className="glass-card p-6">
+            <div className="text-3xl mb-2">🍽️</div>
+            <p className="text-sm text-gray-400">AI Macro Tracking</p>
+          </div>
+          <div className="glass-card p-6">
+            <div className="text-3xl mb-2">💪</div>
+            <p className="text-sm text-gray-400">Workout Logging</p>
+          </div>
+          <div className="glass-card p-6">
+            <div className="text-3xl mb-2">🎯</div>
+            <p className="text-sm text-gray-400">Goal Monitoring</p>
+          </div>
         </div>
       </main>
     </div>

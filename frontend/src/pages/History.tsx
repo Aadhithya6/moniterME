@@ -38,32 +38,35 @@ export default function History() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-500/20 border-t-emerald-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-slate-800">History</h1>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-100">History</h1>
+        <p className="text-gray-400 mt-2">View your past workouts and meals</p>
+      </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
           onClick={() => setActiveTab('workouts')}
-          className={`rounded-lg px-4 py-2 font-medium ${
+          className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 ${
             activeTab === 'workouts'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-white text-slate-600 shadow-sm hover:bg-slate-50'
+              ? 'bg-emerald-500 text-white'
+              : 'glass-card text-gray-400 hover:text-gray-200'
           }`}
         >
           Workouts
         </button>
         <button
           onClick={() => setActiveTab('food')}
-          className={`rounded-lg px-4 py-2 font-medium ${
+          className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 ${
             activeTab === 'food'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-white text-slate-600 shadow-sm hover:bg-slate-50'
+              ? 'bg-emerald-500 text-white'
+              : 'glass-card text-gray-400 hover:text-gray-200'
           }`}
         >
           Food
@@ -72,34 +75,34 @@ export default function History() {
 
       {activeTab === 'food' && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">Date</label>
+          <label className="mb-2 block text-sm font-medium text-gray-300">Date</label>
           <input
             type="date"
             value={historyDate}
             onChange={(e) => setHistoryDate(e.target.value)}
-            className="rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input"
           />
         </div>
       )}
 
       {activeTab === 'workouts' && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-slate-800">Workout History</h2>
+          <h2 className="text-xl font-semibold text-gray-100">Workout History (Last 30 days)</h2>
           {workouts.length === 0 ? (
-            <p className="text-slate-500">No workouts recorded yet.</p>
+            <div className="glass-card p-8 text-center text-gray-500">No workouts recorded yet.</div>
           ) : (
             <div className="space-y-4">
               {workouts.map((session) => (
                 <div
                   key={session.id}
-                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+                  className="glass-card p-6 hover:bg-white/10 transition-colors"
                 >
-                  <p className="mb-4 font-semibold text-slate-800">{session.date}</p>
-                  <ul className="space-y-2">
+                  <p className="mb-4 font-semibold text-emerald-400">{session.date}</p>
+                  <ul className="space-y-3">
                     {session.exercises.map((ex, i) => (
-                      <li key={i} className="flex justify-between text-slate-600">
+                      <li key={i} className="flex justify-between text-gray-300">
                         <span>{ex.exerciseName}</span>
-                        <span>
+                        <span className="text-gray-500">
                           {ex.sets}×{ex.reps}
                           {ex.weight != null && ` @ ${ex.weight}kg`}
                         </span>
@@ -115,18 +118,21 @@ export default function History() {
 
       {activeTab === 'food' && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-slate-800">Food Log - {historyDate}</h2>
+          <h2 className="text-xl font-semibold text-gray-100">Food Log - {historyDate}</h2>
           {foodLogs.length === 0 ? (
-            <p className="text-slate-500">No food logged for this date.</p>
+            <div className="glass-card p-8 text-center text-gray-500">No food logged for this date.</div>
           ) : (
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <ul className="divide-y divide-slate-200">
+            <div className="glass-card">
+              <ul className="divide-y divide-white/5">
                 {foodLogs.map((log) => (
-                  <li key={log.id} className="flex justify-between p-4">
-                    <p className="font-medium text-slate-800">{log.food_name}</p>
-                    <p className="text-sm text-slate-500">
-                      {log.calories} cal · P:{log.protein} C:{log.carbs} F:{log.fats}
-                    </p>
+                  <li key={log.id} className="p-6 hover:bg-white/5 transition-colors">
+                    <p className="font-medium text-gray-200 mb-2">{log.food_name}</p>
+                    <div className="flex gap-4 text-sm text-gray-400">
+                      <span>{log.calories} cal</span>
+                      <span>P: {log.protein}g</span>
+                      <span>C: {log.carbs}g</span>
+                      <span>F: {log.fats}g</span>
+                    </div>
                   </li>
                 ))}
               </ul>

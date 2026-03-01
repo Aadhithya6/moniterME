@@ -43,60 +43,62 @@ export default function AddFood() {
   };
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-slate-800">Add Food</h1>
-      <p className="text-slate-600">
-        Describe what you ate and AI will calculate the macros. Example: &quot;2 dosa with coconut
-        chutney&quot;
-      </p>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-100">Add Food</h1>
+        <p className="text-gray-400 mt-2">
+          Describe what you ate and AI will calculate the macros
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="max-w-xl space-y-4">
+      <form onSubmit={handleSubmit} className="glass-card p-8 max-w-2xl space-y-6">
         {error && (
-          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
+          <div className="glass-card p-3 text-sm text-red-400 border-red-500/20">{error}</div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Food description</label>
+          <label className="mb-2 block text-sm font-medium text-gray-300">Food description</label>
           <input
             type="text"
             value={foodText}
             onChange={(e) => setFoodText(e.target.value)}
             required
             placeholder="e.g. 2 dosa with coconut chutney"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input w-full"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Date</label>
+          <label className="mb-2 block text-sm font-medium text-gray-300">Date</label>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="glass-input w-full"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-emerald-600 px-6 py-2.5 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          className="glass-button-primary"
         >
           {loading ? 'Calculating macros...' : 'Add Food'}
         </button>
       </form>
 
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Food Log</h2>
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <h2 className="text-xl font-semibold text-gray-100 mb-4">Food Log - {date}</h2>
+        <div className="glass-card">
           {logs.length === 0 ? (
-            <p className="p-6 text-slate-500">No food logged for this date.</p>
+            <p className="p-8 text-gray-500 text-center">No food logged for this date.</p>
           ) : (
-            <ul className="divide-y divide-slate-200">
+            <ul className="divide-y divide-white/5">
               {logs.map((log) => (
-                <li key={log.id} className="flex justify-between p-4">
-                  <div>
-                    <p className="font-medium text-slate-800">{log.food_name}</p>
-                    <p className="text-sm text-slate-500">
-                      {log.calories} cal · P: {log.protein}g · C: {log.carbs}g · F: {log.fats}g
-                    </p>
+                <li key={log.id} className="p-6 hover:bg-white/5 transition-colors">
+                  <p className="font-medium text-gray-200 mb-2">{log.food_name}</p>
+                  <div className="flex gap-4 text-sm text-gray-400">
+                    <span>{log.calories} cal</span>
+                    <span>P: {log.protein}g</span>
+                    <span>C: {log.carbs}g</span>
+                    <span>F: {log.fats}g</span>
                   </div>
                 </li>
               ))}

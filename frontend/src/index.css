@@ -3,11 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #0B0B0F;
+  --foreground: #E5E7EB;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
+  }
+  
+  .glass-input {
+    @apply bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-transparent transition-all;
+  }
+  
+  .glass-button {
+    @apply bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02];
+  }
+  
+  .glass-button-primary {
+    @apply bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02];
+  }
 }
