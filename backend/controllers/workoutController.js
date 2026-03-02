@@ -5,9 +5,9 @@ const workoutService = require('../services/workoutService');
 
 async function searchExercises(req, res, next) {
   try {
-    const { q, muscle } = req.query;
-    const exercises = await workoutService.searchExercises(q, muscle);
-    res.json({ success: true, data: exercises });
+    const { q, type, bodyPart, equipment, level, page, limit } = req.query;
+    const result = await workoutService.searchExercises(q, bodyPart, type, equipment, level, page, limit);
+    res.json({ success: true, ...result });
   } catch (error) {
     next(error);
   }

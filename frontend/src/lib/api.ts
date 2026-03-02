@@ -48,8 +48,15 @@ export const logWater = (data: { amount_ml: number; date?: string }) =>
 export const getTodayWater = () => api.get('/water/today');
 
 // Workout V2
-export const searchExercises = (q?: string, muscle?: string) =>
-  api.get('/workout/exercises', { params: { q, muscle } });
+export const searchExercises = (params: {
+  q?: string;
+  type?: string;
+  bodyPart?: string;
+  equipment?: string;
+  level?: string;
+  page?: number;
+  limit?: number;
+} = {}) => api.get('/workout/exercises', { params });
 
 export const createWorkout = (data: { name?: string; date?: string }) =>
   api.post('/workout/sessions', data);

@@ -23,22 +23,42 @@ export default function AddWorkout() {
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>([]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    type: '',
+    bodyPart: '',
+    equipment: '',
+    level: ''
+  });
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [isSearchingResults, setIsSearchingResults] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (searchQuery.length > 2) {
+    const hasActiveFilters = searchQuery.length > 2 || Object.values(filters).some(v => v !== '');
+
+    if (hasActiveFilters) {
+      setIsSearchingResults(true);
       const delay = setTimeout(() => {
-        searchExercises(searchQuery).then(res => setSearchResults(res.data.data));
+        searchExercises({
+          q: searchQuery.length > 2 ? searchQuery : undefined,
+          ...filters
+        }).then(res => {
+          setSearchResults(res.data.exercises);
+          setTotalCount(res.data.pagination.total);
+        }).finally(() => {
+          setIsSearchingResults(false);
+        });
       }, 300);
       return () => clearTimeout(delay);
     } else {
       setSearchResults([]);
+      setTotalCount(0);
     }
-  }, [searchQuery]);
+  }, [searchQuery, filters]);
 
   const startWorkout = async () => {
     setLoading(true);
@@ -60,9 +80,13 @@ export default function AddWorkout() {
       notes: ''
     };
     setWorkoutExercises([...workoutExercises, newEx]);
-    setSearchQuery('');
-    setSearchResults([]);
+    clearFilters();
     setIsSearching(false);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilters({ type: '', bodyPart: '', equipment: '', level: '' });
   };
 
   const updateSet = (exerciseIndex: number, setIndex: number, field: keyof Set, value: number) => {
@@ -210,6 +234,11 @@ export default function AddWorkout() {
         <div className="relative">
           {isSearching ? (
             <div className="glass-card p-6 border-[#3A86FF]/50 animate-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <span className="performance-header text-[#3A86FF]">Exercise Library</span>
+                {isSearchingResults && <div className="animate-spin h-4 w-4 border-2 border-[#3A86FF]/20 border-t-[#3A86FF] rounded-full" />}
+              </div>
+
               <input
                 autoFocus
                 type="text"
@@ -218,15 +247,85 @@ export default function AddWorkout() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="glass-input w-full mb-4"
               />
+
+              {/* Filters Row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                <select
+                  value={filters.type}
+                  onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                  className="glass-input text-xs py-2 h-auto"
+                >
+                  <option value="">All Types</option>
+                  <option value="Strength">Strength</option>
+                  <option value="Cardio">Cardio</option>
+                  <option value="Flexibility">Flexibility</option>
+                  <option value="Power">Power</option>
+                </select>
+                <select
+                  value={filters.bodyPart}
+                  onChange={(e) => setFilters({ ...filters, bodyPart: e.target.value })}
+                  className="glass-input text-xs py-2 h-auto"
+                >
+                  <option value="">All Body Parts</option>
+                  <option value="Chest">Chest</option>
+                  <option value="Back">Back</option>
+                  <option value="Legs">Legs</option>
+                  <option value="Shoulders">Shoulders</option>
+                  <option value="Arms">Arms</option>
+                  <option value="Core">Core</option>
+                </select>
+                <select
+                  value={filters.equipment}
+                  onChange={(e) => setFilters({ ...filters, equipment: e.target.value })}
+                  className="glass-input text-xs py-2 h-auto"
+                >
+                  <option value="">All Equipment</option>
+                  <option value="Barbell">Barbell</option>
+                  <option value="Dumbbell">Dumbbell</option>
+                  <option value="Machine">Machine</option>
+                  <option value="Bodyweight">Bodyweight</option>
+                </select>
+                <select
+                  value={filters.level}
+                  onChange={(e) => setFilters({ ...filters, level: e.target.value })}
+                  className="glass-input text-xs py-2 h-auto"
+                >
+                  <option value="">All Levels</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+
+              {/* Active Filter Chips */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {Object.entries(filters).map(([key, value]) => value && (
+                  <span key={key} className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#3A86FF]/10 border border-[#3A86FF]/30 text-[0.6rem] text-[#3A86FF] uppercase font-bold">
+                    {value}
+                    <button onClick={() => setFilters({ ...filters, [key]: '' })} className="hover:text-white">&times;</button>
+                  </span>
+                ))}
+                {(searchQuery.length > 2 || Object.values(filters).some(v => v !== '')) && (
+                  <button onClick={clearFilters} className="text-[0.6rem] text-[#8B949E] hover:text-[#B4F000] uppercase font-bold transition-colors">Clear All</button>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center mb-2 px-1">
+                <span className="text-[0.6rem] text-[#8B949E] uppercase tracking-widest">{totalCount} Exercises Found</span>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
                 {searchResults.map((res) => (
                   <button
                     key={res.id}
                     onClick={() => addExercise(res)}
-                    className="p-3 bg-[#161B23] border border-[#161B23] hover:border-[#B4F000]/30 hover:bg-[#1C2128] text-sm text-left transition-all"
+                    className="p-3 bg-[#161B23] border border-[#161B23] hover:border-[#B4F000]/30 hover:bg-[#1C2128] text-sm text-left transition-all relative group/item"
                   >
                     <div className="font-bold text-[#E6EDF3]">{res.name}</div>
-                    <div className="text-[0.6rem] text-[#8B949E] uppercase tracking-widest">{res.muscle_group}</div>
+                    <div className="flex gap-2 mt-1">
+                      <div className="text-[0.6rem] text-[#8B949E] uppercase tracking-widest">{res.body_part}</div>
+                      <div className="text-[0.6rem] text-[#3A86FF] uppercase tracking-widest">{res.exercise_type}</div>
+                    </div>
                   </button>
                 ))}
               </div>

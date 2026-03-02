@@ -7,28 +7,46 @@ const AppError = require('../utils/AppError');
 /**
  * Exercise Library
  */
-async function searchExercises(query, bodyPart, type) {
-  let sql = 'SELECT * FROM exercises WHERE 1=1';
-  const params = [];
+async function searchExercises(query, bodyPart, type, equipment, level, page = 1, limit = 20) {
+  const offset = (page - 1) * limit;
+  const params = [
+    query || null,
+    type || null,
+    bodyPart || null,
+    equipment || null,
+    level || null,
+    limit,
+    offset
+  ];
 
-  if (query) {
-    params.push(`%${query}%`);
-    sql += ` AND name ILIKE $${params.length}`;
-  }
+  const sql = `
+    SELECT *, COUNT(*) OVER() as total_count
+    FROM exercises
+    WHERE
+        ($1::VARCHAR IS NULL OR name ILIKE '%' || $1 || '%')
+    AND ($2::exercise_type_enum IS NULL OR exercise_type = $2)
+    AND ($3::VARCHAR IS NULL OR body_part = $3)
+    AND ($4::VARCHAR IS NULL OR equipment = $4)
+    AND ($5::exercise_level IS NULL OR level = $5)
+    ORDER BY name ASC
+    LIMIT $6 OFFSET $7
+  `;
 
-  if (bodyPart) {
-    params.push(bodyPart);
-    sql += ` AND body_part = $${params.length}`;
-  }
-
-  if (type) {
-    params.push(type);
-    sql += ` AND exercise_type = $${params.length}`;
-  }
-
-  sql += ' ORDER BY name ASC LIMIT 50';
   const result = await pool.query(sql, params);
-  return result.rows;
+  const total = result.rows.length > 0 ? parseInt(result.rows[0].total_count, 10) : 0;
+
+  return {
+    exercises: result.rows.map(r => {
+      const { total_count, ...rest } = r;
+      return rest;
+    }),
+    pagination: {
+      total,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      pages: Math.ceil(total / limit)
+    }
+  };
 }
 
 /**
