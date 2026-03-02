@@ -47,19 +47,27 @@ export const logWater = (data: { amount_ml: number; date?: string }) =>
 
 export const getTodayWater = () => api.get('/water/today');
 
-export const createWorkoutSession = (date?: string) =>
-  api.post('/workout/session', date ? { date } : {});
+// Workout V2
+export const searchExercises = (q?: string, muscle?: string) =>
+  api.get('/workout/exercises', { params: { q, muscle } });
 
-export const addExercise = (data: {
-  session_id: string;
-  exercise_name: string;
-  sets: number;
-  reps: number;
-  weight?: number;
-}) => api.post('/workout/exercise', data);
+export const createWorkout = (data: { name?: string; date?: string }) =>
+  api.post('/workout/sessions', data);
+
+export const getWorkout = (id: string) => api.get(`/workout/sessions/${id}`);
+
+export const addExerciseToWorkout = (data: {
+  workout_id: string;
+  exercise_id: string;
+  order_index: number;
+  notes?: string;
+  sets: { set_number: number; weight: number; reps: number; rest_seconds?: number }[];
+}) => api.post('/workout/exercises', data);
 
 export const getWorkoutHistory = (limit?: number) =>
   api.get('/workout/history', { params: limit ? { limit } : {} });
+
+export const getWorkoutStats = () => api.get('/workout/stats');
 
 export const upsertGoals = (data: {
   calorie_goal?: number;

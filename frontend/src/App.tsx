@@ -8,6 +8,7 @@ import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
 import AddFood from '@/pages/AddFood';
 import AddWorkout from '@/pages/AddWorkout';
+import WorkoutTracking from '@/pages/WorkoutTracking';
 import Goals from '@/pages/Goals';
 import History from '@/pages/History';
 
@@ -48,6 +49,14 @@ export default function App() {
             element={
               <DashboardLayout>
                 <AddFood />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/workout-hub"
+            element={
+              <DashboardLayout>
+                <WorkoutTracking />
               </DashboardLayout>
             }
           />

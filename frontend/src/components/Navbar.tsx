@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const navLinks = [
   { href: '/dashboard', label: 'DB', icon: 'M4 6h16M4 12h16M4 18h16' }, // Simplified icons or using paths later
   { href: '/add-food', label: 'FD', icon: 'M12 3v18m9-9H3' },
-  { href: '/add-workout', label: 'WK', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+  { href: '/workout-hub', label: 'TR', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
   { href: '/goals', label: 'GL', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
   { href: '/history', label: 'HS', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
 ];

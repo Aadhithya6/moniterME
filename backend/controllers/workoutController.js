@@ -3,14 +3,36 @@
  */
 const workoutService = require('../services/workoutService');
 
-async function createSession(req, res, next) {
+async function searchExercises(req, res, next) {
   try {
-    const { date } = req.body;
-    const userId = req.user.id;
-    const targetDate = date || new Date().toISOString().split('T')[0];
+    const { q, muscle } = req.query;
+    const exercises = await workoutService.searchExercises(q, muscle);
+    res.json({ success: true, data: exercises });
+  } catch (error) {
+    next(error);
+  }
+}
 
-    const session = await workoutService.createSession(userId, targetDate);
-    res.status(201).json({ success: true, data: session });
+async function createWorkout(req, res, next) {
+  try {
+    const { name, date } = req.body;
+    const userId = req.user.id;
+    const workout = await workoutService.createWorkout(userId, name, date);
+    res.status(201).json({ success: true, data: workout });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getWorkout(req, res, next) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const workout = await workoutService.getWorkoutDetails(id, userId);
+    if (!workout) {
+      return res.status(404).json({ success: false, error: 'Workout not found' });
+    }
+    res.json({ success: true, data: workout });
   } catch (error) {
     next(error);
   }
@@ -18,25 +40,21 @@ async function createSession(req, res, next) {
 
 async function addExercise(req, res, next) {
   try {
-    const { session_id, exercise_name, sets, reps, weight } = req.body;
-    const userId = req.user.id;
+    const { workout_id, exercise_id, order_index, notes, sets } = req.body;
 
-    if (!session_id || !exercise_name || sets === undefined || reps === undefined) {
-      return res.status(400).json({
-        success: false,
-        error: 'session_id, exercise_name, sets, and reps are required',
-      });
+    const workoutEx = await workoutService.addExerciseToWorkout(
+      workout_id,
+      exercise_id,
+      order_index,
+      notes
+    );
+
+    if (sets && sets.length > 0) {
+      const addedSets = await workoutService.addSets(workoutEx.id, sets);
+      workoutEx.sets = addedSets;
     }
 
-    const exercise = await workoutService.addExercise(
-      session_id,
-      userId,
-      exercise_name,
-      parseInt(sets, 10),
-      parseInt(reps, 10),
-      weight != null ? parseFloat(weight) : null
-    );
-    res.status(201).json({ success: true, data: exercise });
+    res.status(201).json({ success: true, data: workoutEx });
   } catch (error) {
     next(error);
   }
@@ -53,8 +71,32 @@ async function getHistory(req, res, next) {
   }
 }
 
+async function getStats(req, res, next) {
+  try {
+    const userId = req.user.id;
+    // Basic stats for now, can be expanded
+    const history = await workoutService.getHistory(userId, 365);
+    const totalVolume = history.reduce((sum, w) => sum + parseFloat(w.total_volume || 0), 0);
+    const totalWorkouts = history.length;
+
+    res.json({
+      success: true,
+      data: {
+        totalWorkouts,
+        totalVolume,
+        history: history.slice(0, 7) // Last 7 for charts
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
-  createSession,
+  searchExercises,
+  createWorkout,
+  getWorkout,
   addExercise,
   getHistory,
+  getStats,
 };

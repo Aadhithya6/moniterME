@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { getTodayDashboard, logWater } from '@/lib/api';
 import ProgressBar from '@/components/ProgressBar';
+import RecentWorkoutsWidget from '@/components/workout/RecentWorkoutsWidget';
 
 type DashboardData = {
   date: string;
@@ -228,6 +229,11 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* Recent Workouts Widget */}
+          <div className="animate-in fade-in duration-1000 delay-600 fill-mode-both">
+            <RecentWorkoutsWidget />
+          </div>
         </div>
 
         {/* Secondary Metrics: Stagger 3 */}
@@ -291,8 +297,8 @@ export default function Dashboard() {
             <Link to="/add-food" className="glass-button-primary w-full text-center">
               Deploy Food Entry
             </Link>
-            <Link to="/add-workout" className="glass-button w-full text-center">
-              Log Session
+            <Link to="/workout-hub" className="glass-button w-full text-center">
+              Training Hub
             </Link>
           </div>
         </div>

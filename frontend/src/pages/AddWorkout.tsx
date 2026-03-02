@@ -1,31 +1,50 @@
-import { useState } from 'react';
-import { createWorkoutSession, addExercise } from '@/lib/api';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createWorkout, searchExercises, addExerciseToWorkout } from '@/lib/api';
 
-type Exercise = {
-  id?: string;
-  exerciseName: string;
-  sets: number;
+type Set = {
+  set_number: number;
+  weight: number;
   reps: number;
-  weight: number | null;
+  rest_seconds: number;
+};
+
+type WorkoutExercise = {
+  exercise_id: string;
+  name: string;
+  sets: Set[];
+  notes: string;
 };
 
 export default function AddWorkout() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [exerciseName, setExerciseName] = useState('');
-  const [sets, setSets] = useState(3);
-  const [reps, setReps] = useState(10);
-  const [weight, setWeight] = useState('');
+  const navigate = useNavigate();
+  const [workoutId, setWorkoutId] = useState<string | null>(null);
+  const [workoutName, setWorkoutName] = useState('Morning Workout');
+  const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const startSession = async () => {
-    setError('');
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      const delay = setTimeout(() => {
+        searchExercises(searchQuery).then(res => setSearchResults(res.data.data));
+      }, 300);
+      return () => clearTimeout(delay);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  const startWorkout = async () => {
     setLoading(true);
     try {
-      const { data } = await createWorkoutSession();
-      setSessionId(data.data.id);
-      setExercises([]);
+      const { data } = await createWorkout({ name: workoutName });
+      setWorkoutId(data.data.id);
     } catch {
       setError('Failed to start workout');
     } finally {
@@ -33,162 +52,199 @@ export default function AddWorkout() {
     }
   };
 
-  const addExerciseToSession = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sessionId) return;
-    setError('');
+  const addExercise = (exercise: any) => {
+    const newEx: WorkoutExercise = {
+      exercise_id: exercise.id,
+      name: exercise.name,
+      sets: [{ set_number: 1, weight: 0, reps: 0, rest_seconds: 60 }],
+      notes: ''
+    };
+    setWorkoutExercises([...workoutExercises, newEx]);
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearching(false);
+  };
+
+  const updateSet = (exerciseIndex: number, setIndex: number, field: keyof Set, value: number) => {
+    const updated = [...workoutExercises];
+    updated[exerciseIndex].sets[setIndex][field] = value;
+    setWorkoutExercises(updated);
+  };
+
+  const addSet = (exerciseIndex: number) => {
+    const updated = [...workoutExercises];
+    const lastSet = updated[exerciseIndex].sets[updated[exerciseIndex].sets.length - 1];
+    updated[exerciseIndex].sets.push({
+      set_number: updated[exerciseIndex].sets.length + 1,
+      weight: lastSet.weight,
+      reps: lastSet.reps,
+      rest_seconds: lastSet.rest_seconds
+    });
+    setWorkoutExercises(updated);
+  };
+
+  const saveWorkout = async () => {
+    if (!workoutId) return;
     setLoading(true);
     try {
-      const { data } = await addExercise({
-        session_id: sessionId,
-        exercise_name: exerciseName,
-        sets,
-        reps,
-        weight: weight ? parseFloat(weight) : undefined,
-      });
-      setExercises((prev) => [
-        ...prev,
-        {
-          id: data.data.id,
-          exerciseName: data.data.exerciseName,
-          sets: data.data.sets,
-          reps: data.data.reps,
-          weight: data.data.weight,
-        },
-      ]);
-      setExerciseName('');
-      setSets(3);
-      setReps(10);
-      setWeight('');
+      // Add each exercise with its sets
+      for (let i = 0; i < workoutExercises.length; i++) {
+        const ex = workoutExercises[i];
+        await addExerciseToWorkout({
+          workout_id: workoutId,
+          exercise_id: ex.exercise_id,
+          order_index: i,
+          notes: ex.notes,
+          sets: ex.sets
+        });
+      }
+      navigate('/workout-hub');
     } catch {
-      setError('Failed to add exercise');
+      setError('Failed to save workout data');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-100">Add Workout</h1>
-        <p className="text-gray-400 mt-2">Log your training session</p>
-      </div>
-
-      {!sessionId ? (
-        <div className="glass-card p-8 max-w-2xl">
-          <p className="mb-6 text-gray-300">
-            Start a new workout session to log your exercises.
-          </p>
+  if (!workoutId) {
+    return (
+      <div className="max-w-xl mx-auto space-y-8 py-10">
+        <h1 className="text-3xl font-bold text-[#E6EDF3]">New Training Session</h1>
+        <div className="glass-card p-8">
+          <label className="performance-header mb-2 block">Workout Name</label>
+          <input
+            type="text"
+            value={workoutName}
+            onChange={(e) => setWorkoutName(e.target.value)}
+            className="glass-input w-full mb-6"
+          />
           <button
-            onClick={startSession}
+            onClick={startWorkout}
             disabled={loading}
-            className="glass-button-primary"
+            className="glass-button-primary w-full"
           >
-            {loading ? 'Starting...' : 'Start Workout'}
+            {loading ? 'Initializing...' : 'Ready to Start'}
           </button>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {error && (
-            <div className="glass-card p-3 text-sm text-red-400 border-red-500/20">{error}</div>
-          )}
+      </div>
+    );
+  }
 
-          <form
-            onSubmit={addExerciseToSession}
-            className="glass-card p-8"
-          >
-            <h2 className="text-xl font-semibold text-gray-100 mb-6">Add Exercise</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">Exercise</label>
-                <input
-                  type="text"
-                  value={exerciseName}
-                  onChange={(e) => setExerciseName(e.target.value)}
-                  required
-                  placeholder="e.g. Bench Press"
-                  className="glass-input w-full"
-                />
+  return (
+    <div className="max-w-4xl mx-auto space-y-10 pb-20">
+      <header className="flex justify-between items-end border-b border-[#161B23] pb-6">
+        <div>
+          <span className="performance-header block mb-2">In Progress: {workoutName}</span>
+          <h1 className="text-4xl font-bold tracking-tight text-[#E6EDF3]">Record Sets</h1>
+        </div>
+        <button onClick={saveWorkout} disabled={loading} className="glass-button-primary">
+          {loading ? 'Saving...' : 'Finish Workout'}
+        </button>
+      </header>
+
+      {error && <div className="text-red-400 font-mono text-sm">{error}</div>}
+
+      <div className="space-y-12">
+        {workoutExercises.map((ex, exIndex) => (
+          <div key={exIndex} className="glass-card p-8 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#B4F000]/30 group-hover:bg-[#B4F000] transition-colors" />
+            <h2 className="text-xl font-bold text-[#E6EDF3] mb-6 flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-[#161B23] flex items-center justify-center text-sm border border-[#B4F000]/20 text-[#B4F000]">
+                {exIndex + 1}
+              </span>
+              {ex.name}
+            </h2>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-12 gap-4 px-2 text-[0.6rem] uppercase tracking-widest font-bold text-[#8B949E]">
+                <div className="col-span-1">Set</div>
+                <div className="col-span-3 text-center">Weight (kg)</div>
+                <div className="col-span-3 text-center">Reps</div>
+                <div className="col-span-3 text-center">Rest (s)</div>
+                <div className="col-span-2"></div>
               </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">Sets</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={sets}
-                  onChange={(e) => setSets(parseInt(e.target.value, 10) || 0)}
-                  className="glass-input w-full"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">Reps</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={reps}
-                  onChange={(e) => setReps(parseInt(e.target.value, 10) || 0)}
-                  className="glass-input w-full"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  step={0.5}
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder="Optional"
-                  className="glass-input w-full"
-                />
-              </div>
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="glass-button w-full"
-                >
-                  {loading ? 'Adding...' : 'Add'}
-                </button>
-              </div>
+
+              {ex.sets.map((set, setIndex) => (
+                <div key={setIndex} className="grid grid-cols-12 gap-4 items-center animate-in fade-in slide-in-from-left-4 duration-300">
+                  <div className="col-span-1 text-[#8B949E] font-bold text-sm">#{set.set_number}</div>
+                  <div className="col-span-3">
+                    <input
+                      type="number"
+                      value={set.weight}
+                      onChange={(e) => updateSet(exIndex, setIndex, 'weight', parseFloat(e.target.value) || 0)}
+                      className="glass-input w-full text-center"
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <input
+                      type="number"
+                      value={set.reps}
+                      onChange={(e) => updateSet(exIndex, setIndex, 'reps', parseInt(e.target.value) || 0)}
+                      className="glass-input w-full text-center"
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <input
+                      type="number"
+                      value={set.rest_seconds}
+                      onChange={(e) => updateSet(exIndex, setIndex, 'rest_seconds', parseInt(e.target.value) || 0)}
+                      className="glass-input w-full text-center"
+                    />
+                  </div>
+                  <div className="col-span-2 flex justify-end">
+                    {setIndex === ex.sets.length - 1 && (
+                      <button onClick={() => addSet(exIndex)} className="text-[#B4F000] hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </form>
-
-          <div>
-            <h2 className="text-xl font-semibold text-gray-100 mb-4">This Session</h2>
-            {exercises.length === 0 ? (
-              <div className="glass-card p-8 text-center text-gray-500">No exercises added yet.</div>
-            ) : (
-              <ul className="space-y-3">
-                {exercises.map((ex, i) => (
-                  <li
-                    key={ex.id || i}
-                    className="glass-card p-4 flex justify-between items-center hover:bg-white/10 transition-colors"
-                  >
-                    <span className="font-medium text-gray-200">{ex.exerciseName}</span>
-                    <span className="text-gray-400">
-                      {ex.sets}×{ex.reps}
-                      {ex.weight != null && ` @ ${ex.weight}kg`}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
+        ))}
 
-          <button
-            onClick={() => {
-              setSessionId(null);
-              setExercises([]);
-            }}
-            className="glass-button"
-          >
-            Finish Workout
-          </button>
+        {/* Add Exercise Trigger */}
+        <div className="relative">
+          {isSearching ? (
+            <div className="glass-card p-6 border-[#3A86FF]/50 animate-in zoom-in-95 duration-200">
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search exercise (e.g. Bench Press)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="glass-input w-full mb-4"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                {searchResults.map((res) => (
+                  <button
+                    key={res.id}
+                    onClick={() => addExercise(res)}
+                    className="p-3 bg-[#161B23] border border-[#161B23] hover:border-[#B4F000]/30 hover:bg-[#1C2128] text-sm text-left transition-all"
+                  >
+                    <div className="font-bold text-[#E6EDF3]">{res.name}</div>
+                    <div className="text-[0.6rem] text-[#8B949E] uppercase tracking-widest">{res.muscle_group}</div>
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => setIsSearching(false)} className="mt-4 text-xs text-[#8B949E] hover:text-white uppercase tracking-widest">Cancel</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsSearching(true)}
+              className="w-full glass-card p-8 border-dashed border-[#161B23] hover:border-[#3A86FF] hover:bg-[#3A86FF]/5 text-[#8B949E] hover:text-[#3A86FF] transition-all flex flex-col items-center gap-3"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-bold uppercase tracking-[0.2em] text-xs">Add Exercise</span>
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
