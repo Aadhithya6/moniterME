@@ -86,3 +86,6 @@ export const upsertGoals = (data: {
 export const getGoals = () => api.get('/goals');
 
 export const getTodayDashboard = () => api.get('/dashboard/today');
+
+export const completeOnboarding = (data: any) =>
+  api.post('/user/onboarding', data);

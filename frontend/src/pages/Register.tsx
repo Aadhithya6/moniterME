@@ -23,7 +23,7 @@ export default function Register() {
     try {
       const { data } = await apiRegister({ name, email, password });
       login(data.user, data.token);
-      navigate('/dashboard');
+      navigate('/onboarding');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(msg || 'Registration failed');

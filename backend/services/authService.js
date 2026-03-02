@@ -23,11 +23,11 @@ async function register(name, email, password) {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  
+
   const result = await pool.query(
     `INSERT INTO users (name, email, password_hash) 
      VALUES ($1, $2, $3) 
-     RETURNING id, name, email, created_at`,
+     RETURNING id, name, email, onboarding_completed, created_at`,
     [name, email.toLowerCase(), passwordHash]
   );
 
@@ -43,6 +43,7 @@ async function register(name, email, password) {
       id: user.id,
       name: user.name,
       email: user.email,
+      onboardingCompleted: user.onboarding_completed,
       createdAt: user.created_at,
     },
     token,
@@ -54,7 +55,7 @@ async function register(name, email, password) {
  */
 async function login(email, password) {
   const result = await pool.query(
-    'SELECT id, name, email, password_hash FROM users WHERE email = $1',
+    'SELECT id, name, email, password_hash, onboarding_completed FROM users WHERE email = $1',
     [email.toLowerCase()]
   );
 
@@ -80,6 +81,7 @@ async function login(email, password) {
       id: user.id,
       name: user.name,
       email: user.email,
+      onboardingCompleted: user.onboarding_completed,
     },
     token,
   };

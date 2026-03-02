@@ -11,6 +11,7 @@ import AddWorkout from '@/pages/AddWorkout';
 import WorkoutTracking from '@/pages/WorkoutTracking';
 import Goals from '@/pages/Goals';
 import History from '@/pages/History';
+import Onboarding from '@/pages/Onboarding';
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -84,6 +85,7 @@ export default function App() {
               </DashboardLayout>
             }
           />
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

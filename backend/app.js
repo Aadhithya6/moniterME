@@ -9,6 +9,7 @@ const waterRoutes = require('./routes/waterRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
 const goalsRoutes = require('./routes/goalsRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const userRoutes = require('./routes/userRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/water', waterRoutes);
 app.use('/api/workout', workoutRoutes);
 app.use('/api/goals', goalsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/user', userRoutes);
 
 // 404 handler
 app.use((req, res) => {

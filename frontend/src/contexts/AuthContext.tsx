@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type User = { id: string; name: string; email: string };
+type User = { id: string; name: string; email: string; onboardingCompleted: boolean };
 
 type AuthContextType = {
   user: User | null;

@@ -22,7 +22,11 @@ export default function Login() {
     try {
       const { data } = await apiLogin({ email, password });
       login(data.user, data.token);
-      navigate('/dashboard');
+      if (data.user.onboardingCompleted) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(msg || 'Login failed');
