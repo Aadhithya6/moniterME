@@ -158,10 +158,11 @@ async function getHistory(userId, limit = 30) {
                   'weight', (SELECT weight FROM workout_sets WHERE workout_exercise_id = we.id LIMIT 1)
                 ) ORDER BY we.order_index ASC
               )
-              FROM workout_exercises we
+               FROM workout_exercises we
               JOIN exercises e ON e.id = we.exercise_id
               WHERE we.workout_id = w.id
-            ), '[]'::json) as exercises
+            ), '[]'::json) as exercises,
+            w.calories_burned, w.calories_status
      FROM workouts w
      WHERE w.user_id = $1
      ORDER BY w.date DESC, w.created_at DESC
@@ -198,6 +199,64 @@ async function getWorkoutCountByDate(userId, date) {
   return parseInt(result.rows[0].count, 10);
 }
 
+/**
+ * Complete a workout and trigger AI calorie estimation (background)
+ */
+async function completeWorkout(workoutId, userId) {
+  // 1. Update status to processing
+  await pool.query(
+    `UPDATE workouts SET calories_status = 'processing' WHERE id = $1 AND user_id = $2`,
+    [workoutId, userId]
+  );
+
+  // 2. Fetch workout data and user weight for AI
+  const workoutData = await getWorkoutDetails(workoutId, userId);
+
+  const userResult = await pool.query(
+    'SELECT weight_kg, height_cm, age, gender FROM users WHERE id = $1',
+    [userId]
+  );
+  const userProfile = userResult.rows[0];
+
+  // 3. Trigger background estimation (do not await)
+  processCaloriesInBackground(workoutId, workoutData, userProfile);
+
+  return { id: workoutId, status: 'processing' };
+}
+
+/**
+ * Background worker for AI estimation
+ */
+async function processCaloriesInBackground(workoutId, workoutData, userProfile) {
+  const aiService = require('./aiService'); // Lazy load to avoid circular dep
+
+  try {
+    const calories = await aiService.estimateWorkoutCalories(workoutData, userProfile);
+
+    await pool.query(
+      `UPDATE workouts 
+       SET calories_burned = $1, 
+           calories_status = 'completed', 
+           calories_estimated_at = NOW() 
+       WHERE id = $2`,
+      [calories, workoutId]
+    );
+  } catch (error) {
+    console.error(`Background calorie estimation failed for workout ${workoutId}:`, error.message);
+    await pool.query(
+      `UPDATE workouts SET calories_status = 'failed' WHERE id = $1`,
+      [workoutId]
+    );
+  }
+}
+
+/**
+ * Retry calorie estimation
+ */
+async function retryCalories(workoutId, userId) {
+  return completeWorkout(workoutId, userId);
+}
+
 module.exports = {
   searchExercises,
   createWorkout,
@@ -207,4 +266,6 @@ module.exports = {
   getHistory,
   getPersonalRecords,
   getWorkoutCountByDate,
+  completeWorkout,
+  retryCalories
 };

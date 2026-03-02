@@ -30,10 +30,12 @@ async function getTodayDashboard(userId) {
     [userId, today]
   );
 
-  // Workout count
+  // Workout count and calories burned
   const workoutResult = await pool.query(
-    `SELECT COUNT(*) as count
-     FROM workout_sessions
+    `SELECT 
+       COUNT(*) as count,
+       COALESCE(SUM(CASE WHEN calories_status = 'completed' THEN calories_burned ELSE 0 END), 0) as burned_calories
+     FROM workouts
      WHERE user_id = $1 AND date = $2`,
     [userId, today]
   );
@@ -45,6 +47,7 @@ async function getTodayDashboard(userId) {
   const totalFats = parseInt(food.total_fats, 10);
   const totalWater = parseInt(waterResult.rows[0].total_water, 10);
   const workoutCount = parseInt(workoutResult.rows[0].count, 10);
+  const burnedCalories = parseFloat(workoutResult.rows[0].burned_calories);
 
   const goals = await goalsService.getGoals(userId);
 
@@ -62,6 +65,7 @@ async function getTodayDashboard(userId) {
       fats: totalFats,
       waterMl: totalWater,
       workoutCount,
+      burnedCalories,
     },
     goals: goals
       ? {

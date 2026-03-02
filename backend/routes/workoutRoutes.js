@@ -11,5 +11,7 @@ router.get('/sessions/:id', workoutController.getWorkout);
 router.post('/exercises', workoutController.addExercise);
 router.get('/history', workoutController.getHistory);
 router.get('/stats', workoutController.getStats);
+router.post('/sessions/:id/complete', workoutController.completeWorkout);
+router.post('/sessions/:id/retry-calories', workoutController.retryCalories);
 
 module.exports = router;

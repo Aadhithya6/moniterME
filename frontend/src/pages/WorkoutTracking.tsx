@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getWorkoutHistory, getWorkoutStats } from '@/lib/api';
+import { getWorkoutHistory, getWorkoutStats, retryWorkoutCalories } from '@/lib/api';
 
 type WorkoutSummary = {
     id: string;
@@ -8,6 +8,8 @@ type WorkoutSummary = {
     date: string;
     exercise_count: number;
     total_volume: number;
+    calories_burned?: number;
+    calories_status?: 'pending' | 'processing' | 'completed' | 'failed';
 };
 
 type WorkoutStats = {
@@ -90,14 +92,42 @@ export default function WorkoutTracking() {
                                     </h3>
                                     <p className="text-sm text-[#8B949E] mt-1">{new Date(workout.date).toLocaleDateString()}</p>
                                 </div>
-                                <div className="text-right flex gap-8">
-                                    <div>
-                                        <span className="text-[0.6rem] uppercase tracking-widest text-[#8B949E] block">Exercises</span>
-                                        <span className="font-bold text-[#E6EDF3]">{workout.exercise_count}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-[0.6rem] uppercase tracking-widest text-[#8B949E] block">Volume</span>
-                                        <span className="font-bold text-[#3A86FF]">{parseFloat(workout.total_volume.toString()).toLocaleString()}kg</span>
+                                <div className="flex flex-col items-end gap-2 text-right">
+                                    <div className="flex gap-8">
+                                        <div>
+                                            <span className="text-[0.6rem] uppercase tracking-widest text-[#8B949E] block">Exercises</span>
+                                            <span className="font-bold text-[#E6EDF3]">{workout.exercise_count}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[0.6rem] uppercase tracking-widest text-[#8B949E] block">Volume</span>
+                                            <span className="font-bold text-[#3A86FF]">{parseFloat(workout.total_volume.toString()).toLocaleString()}kg</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[0.6rem] uppercase tracking-widest text-[#8B949E] block">Burn (AI)</span>
+                                            {workout.calories_status === 'completed' ? (
+                                                <span className="font-bold text-[#B4F000]">{Math.round(workout.calories_burned || 0)} kcal</span>
+                                            ) : workout.calories_status === 'processing' ? (
+                                                <span className="text-[0.6rem] text-[#8B949E] animate-pulse">Processing...</span>
+                                            ) : workout.calories_status === 'failed' ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[0.6rem] text-red-400">Failed</span>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            retryWorkoutCalories(workout.id).then(() => {
+                                                                // Refresh
+                                                                getWorkoutHistory(10).then(res => setHistory(res.data.data));
+                                                            });
+                                                        }}
+                                                        className="text-[0.6rem] text-[#B4F000] hover:underline"
+                                                    >
+                                                        Retry
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[0.6rem] text-[#8B949E]">N/A</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </Link>

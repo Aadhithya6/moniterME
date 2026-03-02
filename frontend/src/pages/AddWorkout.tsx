@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createWorkout, searchExercises, addExerciseToWorkout } from '@/lib/api';
+import { createWorkout, searchExercises, addExerciseToWorkout, completeWorkoutSession } from '@/lib/api';
 
 type Set = {
   set_number: number;
@@ -122,6 +122,8 @@ export default function AddWorkout() {
           sets: ex.sets
         });
       }
+      // Trigger AI calorie estimation
+      await completeWorkoutSession(workoutId);
       navigate('/workout-hub');
     } catch {
       setError('Failed to save workout data');

@@ -92,6 +92,28 @@ async function getStats(req, res, next) {
   }
 }
 
+async function completeWorkout(req, res, next) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const result = await workoutService.completeWorkout(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function retryCalories(req, res, next) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const result = await workoutService.retryCalories(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   searchExercises,
   createWorkout,
@@ -99,4 +121,6 @@ module.exports = {
   addExercise,
   getHistory,
   getStats,
+  completeWorkout,
+  retryCalories,
 };

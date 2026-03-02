@@ -89,3 +89,9 @@ export const getTodayDashboard = () => api.get('/dashboard/today');
 
 export const completeOnboarding = (data: any) =>
   api.post('/user/onboarding', data);
+
+export const completeWorkoutSession = (id: string) =>
+  api.post(`/workout/sessions/${id}/complete`);
+
+export const retryWorkoutCalories = (id: string) =>
+  api.post(`/workout/sessions/${id}/retry-calories`);

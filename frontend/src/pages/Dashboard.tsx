@@ -20,6 +20,7 @@ type DashboardData = {
     fats: number;
     waterMl: number;
     workoutCount: number;
+    burnedCalories: number;
   };
   goals: {
     calorieGoal: number;
@@ -126,6 +127,23 @@ export default function Dashboard() {
                   <ProgressBar value={totals.calories} max={goals.calorieGoal} label="Energy Expenditure" color="accent" />
                 </div>
               )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+            <div className="glass-card p-6 border-l-2 border-[#B4F000]">
+              <span className="performance-header text-[#B4F000]">Active Burn (AI)</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-3xl font-bold text-[#E6EDF3]">{Math.round(totals.burnedCalories).toLocaleString()}</span>
+                <span className="text-[#8B949E] text-xs font-bold italic tracking-widest uppercase">Kcal</span>
+              </div>
+            </div>
+            <div className="glass-card p-6 border-l-2 border-[#3A86FF]">
+              <span className="performance-header text-[#3A86FF]">Net Energy</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-3xl font-bold text-[#E6EDF3]">{Math.round(totals.calories - totals.burnedCalories).toLocaleString()}</span>
+                <span className="text-[#8B949E] text-xs font-bold italic tracking-widest uppercase">Kcal</span>
+              </div>
             </div>
           </div>
 

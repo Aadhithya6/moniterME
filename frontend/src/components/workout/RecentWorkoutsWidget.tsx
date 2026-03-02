@@ -38,7 +38,10 @@ export default function RecentWorkoutsWidget() {
                             </div>
                             <div className="text-right">
                                 <div className="text-xs font-bold text-[#3A86FF]">{parseFloat(w.total_volume).toLocaleString()}kg</div>
-                                <div className="text-[0.6rem] text-[#8B949E] uppercase tracking-widest">{w.exercise_count} Exercises</div>
+                                {w.calories_status === 'completed' && (
+                                    <div className="text-[0.6rem] font-bold text-[#B4F000] mt-1">{Math.round(w.calories_burned)} KCAL</div>
+                                )}
+                                <div className="text-[0.6rem] text-[#8B949E] uppercase tracking-widest mt-0.5">{w.exercise_count} Exercises</div>
                             </div>
                         </div>
                     ))
