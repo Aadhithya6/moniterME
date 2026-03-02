@@ -7,7 +7,7 @@ const AppError = require('../utils/AppError');
 /**
  * Exercise Library
  */
-async function searchExercises(query, muscleGroup) {
+async function searchExercises(query, bodyPart, type) {
   let sql = 'SELECT * FROM exercises WHERE 1=1';
   const params = [];
 
@@ -16,9 +16,14 @@ async function searchExercises(query, muscleGroup) {
     sql += ` AND name ILIKE $${params.length}`;
   }
 
-  if (muscleGroup) {
-    params.push(muscleGroup);
-    sql += ` AND muscle_group = $${params.length}`;
+  if (bodyPart) {
+    params.push(bodyPart);
+    sql += ` AND body_part = $${params.length}`;
+  }
+
+  if (type) {
+    params.push(type);
+    sql += ` AND exercise_type = $${params.length}`;
   }
 
   sql += ' ORDER BY name ASC LIMIT 50';
@@ -56,15 +61,15 @@ async function addExerciseToWorkout(workoutId, exerciseId, orderIndex, notes = '
  * Add sets to a workout exercise
  */
 async function addSets(workoutExerciseId, sets) {
-  // sets: [{ set_number, weight, reps, rest_seconds }]
+  // sets: [{ set_number, weight, reps, rest_seconds, is_completed }]
   const values = sets.map((s, i) =>
-    `('${workoutExerciseId}', ${s.set_number || i + 1}, ${s.weight || 0}, ${s.reps}, ${s.rest_seconds || 60})`
+    `('${workoutExerciseId}', ${s.set_number || i + 1}, ${s.weight || 0}, ${s.reps}, ${s.rest_seconds || 60}, ${s.is_completed !== false})`
   ).join(',');
 
   const result = await pool.query(
-    `INSERT INTO workout_sets (workout_exercise_id, set_number, weight, reps, rest_seconds)
+    `INSERT INTO workout_sets (workout_exercise_id, set_number, weight, reps, rest_seconds, is_completed)
      VALUES ${values}
-     RETURNING id, workout_exercise_id, set_number, weight, reps, rest_seconds`
+     RETURNING id, workout_exercise_id, set_number, weight, reps, rest_seconds, is_completed`
   );
   return result.rows;
 }
@@ -80,7 +85,8 @@ async function getWorkoutDetails(workoutId, userId) {
                 'id', we.id,
                 'exercise_id', we.exercise_id,
                 'name', e.name,
-                'muscle_group', e.muscle_group,
+                'body_part', e.body_part,
+                'exercise_type', e.exercise_type,
                 'notes', we.notes,
                 'sets', (
                   SELECT json_agg(
@@ -89,7 +95,8 @@ async function getWorkoutDetails(workoutId, userId) {
                       'set_number', ws.set_number,
                       'weight', ws.weight,
                       'reps', ws.reps,
-                      'rest_seconds', ws.rest_seconds
+                      'rest_seconds', ws.rest_seconds,
+                      'is_completed', ws.is_completed
                     ) ORDER BY ws.set_number ASC
                   )
                   FROM workout_sets ws
@@ -119,16 +126,31 @@ async function getHistory(userId, limit = 30) {
   const result = await pool.query(
     `SELECT w.id, w.name, w.date, w.created_at,
             (SELECT COUNT(*) FROM workout_exercises WHERE workout_id = w.id) as exercise_count,
-            (SELECT SUM(ws.weight * ws.reps) 
+            COALESCE((SELECT SUM(ws.weight * ws.reps) 
              FROM workout_sets ws 
              JOIN workout_exercises we ON we.id = ws.workout_exercise_id 
-             WHERE we.workout_id = w.id) as total_volume
+             WHERE we.workout_id = w.id AND ws.is_completed = TRUE), 0) as total_volume,
+            COALESCE((
+              SELECT json_agg(
+                json_build_object(
+                  'id', we.id,
+                  'exerciseName', e.name,
+                  'sets', (SELECT COUNT(*) FROM workout_sets WHERE workout_exercise_id = we.id),
+                  'reps', (SELECT reps FROM workout_sets WHERE workout_exercise_id = we.id LIMIT 1),
+                  'weight', (SELECT weight FROM workout_sets WHERE workout_exercise_id = we.id LIMIT 1)
+                ) ORDER BY we.order_index ASC
+              )
+              FROM workout_exercises we
+              JOIN exercises e ON e.id = we.exercise_id
+              WHERE we.workout_id = w.id
+            ), '[]'::json) as exercises
      FROM workouts w
      WHERE w.user_id = $1
      ORDER BY w.date DESC, w.created_at DESC
      LIMIT $2`,
     [userId, limit]
   );
+
   return result.rows;
 }
 

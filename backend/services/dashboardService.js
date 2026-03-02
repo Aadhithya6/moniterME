@@ -65,11 +65,11 @@ async function getTodayDashboard(userId) {
     },
     goals: goals
       ? {
-          calorieGoal: goals.calorieGoal,
-          proteinGoal: goals.proteinGoal,
-          waterGoal: goals.waterGoal,
-          targetWeight: goals.targetWeight,
-        }
+        calorieGoal: goals.calorieGoal,
+        proteinGoal: goals.proteinGoal,
+        waterGoal: goals.waterGoal,
+        targetWeight: goals.targetWeight,
+      }
       : null,
     completion: {
       calories: calcPercent(totalCalories, goals?.calorieGoal),
